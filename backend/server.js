@@ -46,6 +46,17 @@ io.on('connection',(socket)=>{
     socket.join(socket.roomId);
 
     socket.on('project-message',data=>{
+
+        const message=data.message;
+        const aiIsPresentInMessage=message.includes('@ai')
+        if(aiIsPresentInMessage){
+            socket.emit('project-message',{
+                message:'ai is present',
+                sender:"AI"
+            })
+            return
+        }
+
         console.log(data);
         
         socket.broadcast.to(socket.roomId).emit('project-message',data)
