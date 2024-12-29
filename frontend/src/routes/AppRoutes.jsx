@@ -6,6 +6,7 @@ import Home from '../screens/Home'
 import Project from '../screens/Project'
 import {UserContext} from '../context/user.context'
 import LandingPage from '../screens/LandingPage'
+import UserAuth from '../auth/UserAuth'
 
 export const AppRoutes = () => {
   const {user}= useContext(UserContext) 
@@ -16,10 +17,10 @@ export const AppRoutes = () => {
     <BrowserRouter>
     <Routes>
     <Route path ="/" element ={<LandingPage/> }/>
-        <Route path ="/home" element ={user?<Home/>:<Login/>} />
+        <Route path ="/home" element ={<UserAuth><Home/></UserAuth>} />
         <Route path ="/login" element ={<Login/> }/>
         <Route path ="/register" element ={<Register/>} />
-        <Route path ="/project" element ={user?<Project/>:<Login/>} />
+        <Route path ="/project" element ={<UserAuth><Project/></UserAuth>} />
 
     </Routes>
     </BrowserRouter>

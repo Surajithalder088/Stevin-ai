@@ -1,6 +1,8 @@
-import React,{useEffect, useState} from 'react'
+import React,{useEffect, useState,useContext} from 'react'
 import { useLocation } from 'react-router-dom';
 import axios from '../config/axios.js'
+import { initializeSocket,recievemessage,sendmessage } from '../config/socket.js';
+import { UserContext } from "../context/user.context.jsx"
 
 const Project = ({navigate}) => {
 
@@ -11,13 +13,39 @@ const Project = ({navigate}) => {
     const [isSidePanelOpen,setIsSidePanelOpen]=useState(false)
     const[addUserOpen,setAddUserOpen]=useState(false)
     const[userArray,setUserArray]=useState([])  // selecting user are stord here to add as colebrator
-
+    const [message,setMessage]=useState('')
     const [frnds,setFrnds]=useState([])
+    const messageBox=React.createRef()
 
-
+const {user}=useContext(UserContext)
     
 
+
+    useEffect(() => {
+           initializeSocket(project._id)
+        
+           recievemessage('project-message',(data)=>{
+            console.log(data);
+            appendIncomingMessage(data)
+            
+           })
+            scrollToBottom()
+           
+
+           const projectid=project._id
+            axios.get(`/api/projects/get-project/${projectid}`)
+           .then((res) => {
+               console.log(" project data ",res.data.project);
+               setProject(res.data.project);
+           })
+           .catch((err) =>{console.log(err)})
+
+    },[])
+
    useEffect(() => {
+
+ 
+
     const getcollaborators=async()=>{
 
         const projectid=project._id
@@ -69,7 +97,7 @@ const Project = ({navigate}) => {
         
         await axios.put(`/api/projects/add-user`,{projectId,users:userArray})
         .then((res) => {
-             ;
+             
             console.log(res.data)
         })
         .catch((err) =>{console.log(err)
@@ -97,6 +125,52 @@ const checkhandler=(event)=>{
     
 }
 
+
+const sendMessage=()=>{
+    console.log(user);
+    
+    console.log(message);
+    
+    sendmessage('project-message',{
+        message,
+        sender:user.email
+
+    })
+    const messageObject={
+        message,
+        sender:user.email
+    }
+    appendOutgoingMessage(messageObject)
+    setMessage(" ")
+}
+
+const appendIncomingMessage=(messageObject)=>{
+    const messageBox=document.querySelector('.message-box')
+    const message=document.createElement('div')
+    message.classList.add('bg-red-50','p-2','max-w-56','text-black','rounded','mb-1')
+    message.innerHTML=` <p >${messageObject.sender} </p><p > ${messageObject.message} </p>`
+    messageBox.appendChild(message)
+    
+
+}
+
+const appendOutgoingMessage=(messageObject)=>{
+    const messageBox=document.querySelector('.message-box')
+    const message=document.createElement('div')
+    message.classList.add('bg-slate-500','p-2','ml-auto','max-w-56','text-black','rounded','mb-1')
+    message.innerHTML=`<p>${messageObject.sender} </p> <p >  ${messageObject.message}</p>`
+    messageBox.appendChild(message)
+   
+
+}
+
+function scrollToBottom(){
+   if(messageBox.current)
+             messageBox.current.scrollTop=messageBox.current.scrollHeight
+}
+
+
+
   return (
     <main>
 
@@ -106,8 +180,8 @@ const checkhandler=(event)=>{
     <div className="flex h-screen relative align-center  justify-center">
             {/* Chat Section */}
            
-            <div className=" bg-gray-800 w-72 text-white left-0 p-4">
-            <div className="header mb-4 flex justify-between items-center">
+            <div className=" bg-gray-800 w-72 relative text-white h-screen left-0 p-4">
+            <div className="header mb-4 flex flex-grow  justify-between  items-center top-0">
                 <button 
                 onClick={()=>{setAddUserOpen(true)}}
                 className="headerleft flex hover:text-slate-400 cursor-pointer">
@@ -127,27 +201,34 @@ const checkhandler=(event)=>{
 
               
 
-                <div className="flex flex-col justify-end h-fit">
+                <div className="flex flex-col justify-end pt-6 h-fit">
 
-                    <div className="flex-grow min-h-96 overflow-y-auto">
+                    <div className="flex flex-col flex-grow min-h-96 w-full ">
                         {/* Chat messages will go here */}
                
 
-                        <div className="mb-2 z-0">
-                            <div className="bg-red-50 p-2 max-w-56 text-black rounded mb-1">User1: Hello!</div>
-                            <div className=" ml-auto bg-slate-700 p-2 max-w-56 rounded mb-1">User2: Hi there!</div>
+                        <div 
+                        ref={messageBox}
+                       
+                          className="message-box flex-grow overflow-y-auto max-h-96 pb-10 z-0 scrollbar-hide">
+                            
                             
                         </div>
 
 
                     </div>
-                    <div className="w-fit  flex items-center m-1 fixed bottom-1  left-1 ">
+                    <div className="w-fit bg-gray-800 flex items-center m-1 pt-2 absolute bottom-1  left-1 ">
                         <input
+                          value={message}
+                       onChange={(e)=>{setMessage(e.target.value)}}
                             type="text"
                             placeholder="Type a message..."
                             className="w-full p-2 mr-2 rounded bg-gray-700 text-white"
                         />
-                       <div className="send bg-gray-700 p-2 pr-6 pl-4 text-xl rounded-md text-stone-200"> <i className="ri-send-plane-2-fill"></i></div>
+                       <button 
+                     
+                       onClick={sendMessage}
+                       className="send bg-gray-700 p-2 pr-6 pl-4 text-xl rounded-md text-stone-200"> <i className="ri-send-plane-2-fill"></i></button>
                     </div>
 
                 </div>

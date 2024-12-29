@@ -35,12 +35,14 @@ export const loginController=async(req,res)=>{
         const token=jwt.sign({email:user.email},process.env.JWT_SECRET,{
             expiresIn:'24h'
         })
-
-        res.status(200).cookie('token',token,{
+        res.setHeader('Authorization',`Bearer ${token}`)
+        res.cookie('token',token,{
             httpOnly:true,
             secure:false,
             maxAge:60*60*24,
-        }).json({user,token})
+        })
+        
+        res.status(200).json({user,token})
     }catch(error){
         res.status(400).send(error)
     }

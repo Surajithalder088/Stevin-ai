@@ -23,6 +23,7 @@ const submithandler=async(e)=>{
       withCredentials:true
     }).then((res)=>{
         console.log(res.data);
+        localStorage.setItem('token',res.data.token)
        
         setUser(res.data.user)
         navigate('/home')
