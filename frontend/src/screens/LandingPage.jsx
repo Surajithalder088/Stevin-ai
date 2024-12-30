@@ -20,7 +20,7 @@ const LandingPage = () => {
                 <button className="icons rounded-full text-4xl hover:cursor-pointer flex flex-row align-center text-black justify-center  p-4 w-full bg-sky-700  
                  hover:text-white font-bold mb-4flex flex-row shadow-lg transition-transform transform hover:scale-105 hover:shadow-lg
                  align-center justify-center m-10 p-4 w--32  hover:bg-black text-black font-bold mb-4">
-                <img className='h-9 w-9' src='\public\safe-and-stable-svgrepo-com (1).svg'></img>
+                <img className='h-9 w-9' src='http://res.cloudinary.com/dbxx49ers/raw/upload/v1735561160/twq52zpdoaslp2lymbbe.svg'></img>
                     <h1 className="">
                 Stevin AI</h1>
                 </button>
@@ -39,7 +39,7 @@ const LandingPage = () => {
                          </div>
                 </div>
                 <div className="text-center flex align-center justify-ceneter mb-8 animate-fade-in-right">
-                    <h2 className="text-2xl flex font-semibold mb-2"><img className='h-9 w-9' src='\public\arrow-right-circle-svgrepo-com.svg'></img></h2>
+                    <h2 className="text-2xl flex font-semibold mb-2"><img className='h-9 w-9' src='http://res.cloudinary.com/dbxx49ers/raw/upload/v1735561242/kdcj9a0mcud6mbkipyav.svg'></img></h2>
                     <ul className="list-disc flex text-center style list-inside">
                         <li className='border-2 border-black hover:bg-black hover:text-white hover:border-blue-900 rounded-lg m-2 p-1'>Ai model will design and write code  </li>
                         <li className='border-2 border-black hover:bg-black hover:text-white hover:border-blue-900  rounded-lg m-2 p-1'>Collaborate with team memeber</li>
