@@ -4,6 +4,7 @@ import app from "./app.js"
 import  {Server} from "socket.io"
 import jwt from 'jsonwebtoken'
 import projectModel from "./models/project.model.js"
+import { generateResult} from "./services/ai.service.js"
 
 
 const server=http.createServer(app);
@@ -45,15 +46,18 @@ io.on('connection',(socket)=>{
 
     socket.join(socket.roomId);
 
-    socket.on('project-message',data=>{
+    socket.on('project-message',async data=>{
 
         const message=data.message;
         const aiIsPresentInMessage=message.includes('@ai')
         if(aiIsPresentInMessage){
-            socket.emit('project-message',{
-                message:'ai is present',
+            const prompt = message.replace('@ai','');
+           const result= await generateResult(prompt);
+           
+           io.to(socket.roomId).emit('project-message',{
+                message:result,
                 sender:"AI"
-            })
+           })
             return
         }
 

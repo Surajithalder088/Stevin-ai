@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import axios from '../config/axios.js'
 import { initializeSocket,recievemessage,sendmessage } from '../config/socket.js';
 import { UserContext } from "../context/user.context.jsx"
+import Markdown from 'markdown-to-jsx'
 
 const Project = ({navigate}) => {
 
@@ -147,8 +148,20 @@ const sendMessage=()=>{
 const appendIncomingMessage=(messageObject)=>{
     const messageBox=document.querySelector('.message-box')
     const message=document.createElement('div')
-    message.classList.add('bg-red-50','p-2','max-w-56','text-black','rounded','mb-1')
-    message.innerHTML=` <p >${messageObject.sender} </p><p > ${messageObject.message} </p>`
+  
+
+    if(messageObject.sender==='AI'){
+        message.classList.add('bg-slate-950','p-2','max-w-56','text-white','rounded','mb-1')
+        const markdown =messageObject.message
+        message.innerHTML=`<small>${messageObject.sender}</small> <p className="bg-slate-950 text-stone-100" >${markdown}</p>`
+
+    }else{
+          message.classList.add('bg-red-50','p-2','max-w-56','text-black','rounded','mb-1')
+        message.innerHTML=`<small>${messageObject.sender}</small> <p > ${messageObject.message} </p>`
+    }
+
+    
+
     messageBox.appendChild(message)
     
 
