@@ -4,8 +4,12 @@ import axios from '../config/axios.js'
 import { initializeSocket,recievemessage,sendmessage } from '../config/socket.js';
 import { UserContext } from "../context/user.context.jsx"
 import Markdown from 'markdown-to-jsx'
+import hljs from 'highlight.js'
+import { useNavigate } from 'react-router-dom';
+import { getWebContainer } from '../config/webContainer.js';
 
 const Project = ({navigate}) => {
+    const navigattion=useNavigate()
 
     const location=useLocation()
     console.log(location.state.project);
@@ -15,8 +19,31 @@ const Project = ({navigate}) => {
     const[addUserOpen,setAddUserOpen]=useState(false)
     const[userArray,setUserArray]=useState([])  // selecting user are stord here to add as colebrator
     const [message,setMessage]=useState('')
+    const [isAiResponding,setIsAiResponding]=useState(false)
+    const [fileTree,setFileTree]=useState({
+        'file.js': {
+            file:{
+            content: "  // Your application file code will be here !  // Ask Ai to Create server in express or React app" 
+        }
+            // "
+        }
+
+    })
+
+    const [webContainer,setWebContainer]=useState(null)
+    const [currentFile,setCurrentFile]=useState(null)
     const [frnds,setFrnds]=useState([])
+    const [openFiles,setOpenFiles]=useState([])
     const messageBox=React.createRef()
+    const [mountedFiletree,setMountedFiletree]=useState({
+        'file.js': {
+            file:{
+            content: "  // Your application file code will be here !  // Ask Ai to Create server in express or React app" 
+        }
+            // "
+        }
+    })
+    const [running,setRunning]=useState(false)
 
 const {user}=useContext(UserContext)
     
@@ -24,12 +51,25 @@ const {user}=useContext(UserContext)
 
     useEffect(() => {
            initializeSocket(project._id)
+           if(!webContainer){
+            getWebContainer().then(container =>{
+                setWebContainer(container)
+                console.log("container started you can run now ")
+            })
+           }
         
            recievemessage('project-message',(data)=>{
+            if(data.message){
+               
+                console.log(JSON.parse(data.message));
+                
+            }
+            
             console.log(data);
             appendIncomingMessage(data)
             
            })
+
             scrollToBottom()
            
 
@@ -44,8 +84,6 @@ const {user}=useContext(UserContext)
     },[])
 
    useEffect(() => {
-
- 
 
     const getcollaborators=async()=>{
 
@@ -88,7 +126,10 @@ const {user}=useContext(UserContext)
 
    }, [addUserOpen ===true||isSidePanelOpen===true])
 
+useEffect(() => {
+    runCode()
 
+},[running===true])
 
    const addUser=async()=>{
 
@@ -131,6 +172,12 @@ const sendMessage=()=>{
     console.log(user);
     
     console.log(message);
+    const isAi=message.toLowerCase().includes('ai')
+    if(isAi){
+         setIsAiResponding(true);
+    }
+   
+    
     
     sendmessage('project-message',{
         message,
@@ -145,15 +192,35 @@ const sendMessage=()=>{
     setMessage(" ")
 }
 
-const appendIncomingMessage=(messageObject)=>{
+const appendIncomingMessage=async(messageObject)=>{
     const messageBox=document.querySelector('.message-box')
     const message=document.createElement('div')
   
 
     if(messageObject.sender==='AI'){
+        setOpenFiles([])
+        setCurrentFile(null)
+       
         message.classList.add('bg-slate-950','p-2','max-w-56','text-white','rounded','mb-1')
+
         const markdown =messageObject.message
-        message.innerHTML=`<small>${messageObject.sender}</small> <p className="bg-slate-950 text-stone-100" >${markdown}</p>`
+        const messageBody=JSON.parse(markdown)
+            const files=messageBody.fileTree;
+            if(files){
+                   await webContainer?.mount(messageBody.fileTree)
+    
+       console.log(" web container mounted the files ,file ",files);
+
+            }
+    
+
+         
+         setMountedFiletree(messageBody.fileTree?messageBody.fileTree:fileTree)
+        message.innerHTML=`<small>${messageObject.sender}</small> <p className="bg-slate-950 text-stone-100" >${messageBody.text}</p>`
+       setFileTree(messageBody.fileTree?messageBody.fileTree:fileTree)
+        setTimeout(() => {
+            setIsAiResponding(false);
+        }, 100);
 
     }else{
           message.classList.add('bg-red-50','p-2','max-w-56','text-black','rounded','mb-1')
@@ -182,6 +249,51 @@ function scrollToBottom(){
              messageBox.current.scrollTop=messageBox.current.scrollHeight
 }
 
+async function runCode (){
+    try{
+        console.log(mountedFiletree);
+        
+       await webContainer.mount(mountedFiletree?mountedFiletree:fileTree)
+        console.log("file tree mounted to build");
+        
+        const buildprocess=await webContainer.spawn("npm",["install"])
+        console.log("build success fully");
+        
+
+        buildprocess.outpout.pipeTo(new WritableStream({
+            write(chunk){
+                console.log(chunk)
+            }
+
+      }))
+        
+      const runprocess=await webContainer.spawn("npm",["start"])
+      console.log(" server is live now !! ");
+      
+      runprocess.outpout.pipeTo(new WritableStream({
+            write(chunk){
+                console.log(chunk)
+            }
+
+      }))
+
+    }catch(error){
+        console.log(error)
+    }
+
+}
+
+const handleContentChange = (e) => {
+    
+    setFileTree({
+        ...fileTree,
+        [currentFile]: {
+            ...fileTree[currentFile],
+            content: e.target.value
+        }
+    });
+};
+
 
 
   return (
@@ -201,6 +313,12 @@ function scrollToBottom(){
                 <i className="ri-user-add-fill"></i>
                 <h5 className="text-pretty font-normal">Add Colaborator</h5>
 
+                </button>
+                <button
+                onClick={()=>{navigattion('/home')}}
+                 className="headerleft flex hover:text-slate-400 cursor-pointer"
+                >
+                <i className="ri-home-9-fill"></i>
                 </button>
 
                 <button 
@@ -250,11 +368,108 @@ function scrollToBottom(){
            
 
           {  /* Main Content Section */}
-            <div className="w-3/4 bg-gray-100 absoulute  p-4">
-                <h1 className="text-2xl font-bold mb-4">{project.name}</h1>
-                {/* Main content will go here */} 
-                <p>Project details and other content...</p>
-            </div>
+          
+
+
+            <section className="right flex bg-red-100 flex-grow h-full ">
+    <div className="explore overflow-y-auto h-full bg-slate-400 max-w-28 min-w-20">
+        <div className="file-tree flex flex-col bg-stone-400">
+            {
+                Object.keys(fileTree).map((file,id)=>(
+
+                    <button 
+                    onClick={()=>{setCurrentFile(file) 
+                        setOpenFiles([...new Set([...openFiles,file])])
+                    }
+                    }
+                    className="tree-object overflow-x-auto hover:bg-slate-50 cursor-pointer p-2">
+                <p className=' font-semibold w-full text-lg'>{file}</p>
+            </button>
+                ))
+            }
+            
+            
+        </div>
+    </div>
+
+    
+        {
+            currentFile && (<>
+                <div className="code-editor flex flex-col w-fit  flex-grow">
+                    
+                    <div className="top max-w-2xl overflow-x-auto flex bg-slate-600 ">
+                    {
+                            openFiles.map((file,index)=>(
+
+                                <div className="flex justify-between bg-gray-300  w-fit gap-1 p-1">
+                              <button 
+                              onClick={()=>setCurrentFile(file)}
+                              className='text-stone-950'>  {file}
+                              </button>
+                              <button 
+                              onClick={()=>{
+                                const updatedFiles=openFiles.filter((f)=>f!==file)
+                                setOpenFiles(updatedFiles)
+                                setCurrentFile(updatedFiles.length > 0 ? updatedFiles[updatedFiles.length - 1] : null)
+                              }}
+                              >
+                              <i className="ri-close-line"></i>
+                              </button>
+                              
+                              </div>
+                              
+                            ))
+                        }
+
+                    </div>
+
+
+
+                    <div className="bottom flex h-full">
+                        {
+                            fileTree[currentFile] &&(
+                                <div className="editor h-full flex  max-w-2xl flex-grow bg-slate-800 text-white p-4">
+                              <textarea 
+                              className="w-full h-full bg-slate-800 p-1 text-xs text-white"
+                              value={fileTree[currentFile].file.content}
+                              onChange={handleContentChange}
+                              />
+                              
+                              </div>
+                            )
+                        }
+                    </div>
+                     </div>
+
+                     <div className="code-runner flex flex-col min-w-20 max-w-36 bg-amber-300">
+                        <div className="heading">
+                        <button  
+                        onClick={()=>{setRunning(true)}}
+                        className='bg-slate-400 p-2 rounded-md text-white'
+                        >Run</button></div>
+                        <h4>your application will run here</h4>
+
+
+                     </div>
+                     </>
+
+            )
+        }
+        {
+             isAiResponding && (
+                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <div className="bg-white p-4 rounded shadow-lg">
+                        AI is responding...
+                    </div>
+                </div>
+            )
+        }
+
+
+   
+
+            </section>
+           
             
  
            </div>

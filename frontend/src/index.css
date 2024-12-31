@@ -12,3 +12,8 @@ body{
 .message-box::-webkit-scrollbar{
     display: none;
 }
+.tree-object::-webkit-scrollbar{
+    background-color: black;
+    width: 10px;
+    color: white;
+}

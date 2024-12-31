@@ -1,51 +1,15 @@
-```javascript
-/**
- * Determines if a number is prime. If not prime, returns its smallest prime factor.
- *
- * @param {number} num The number to check.  Must be an integer greater than 1.
- * @returns {boolean|number} True if the number is prime, otherwise its smallest prime factor.
- * @throws {Error} If input is invalid.
- */
-function isPrimeOrFactor(num) {
-  // Error Handling: Check for invalid input
-  if (!Number.isInteger(num) || num <= 1) {
-    throw new Error("Input must be an integer greater than 1.");
-  }
-
-  // Optimization: 2 is the only even prime number
-  if (num === 2) return true;
-  if (num % 2 === 0) return 2; //Even number >2 is not prime
-
-
-  //Check for divisibility from 3 up to the square root of num.
-  for (let i = 3; i <= Math.sqrt(num); i += 2) {  //Increment by 2 to skip even numbers
-    if (num % i === 0) {
-      return i; // Found a factor, so not prime
-    }
-  }
-
-  return true; // No factors found, it's prime
+``````{
+"app.js": "import express from 'express';\nimport 'dotenv/config';\nimport mongoose from 'mongoose';\nimport cookieParser from 'cookie-parser';\nimport userRouter from './router.user.js';\nconst app = express();\n\n// Connect to MongoDB\n(async () => {\n try {\n await mongoose.connect(process.env.MONGO_URI, {\n useNewUrlParser: true,\n useUnifiedTopology: true,\n });\n console.log('Connected to MongoDB');\n } catch (error) {\n console.error('Failed to connect to MongoDB:', error);\n process.exit(1); // Exit the process with an error code\n }\n})();\n\napp.use(express.json());\napp.use(express.urlencoded({ extended: true }));\napp.use(cookieParser());\n\napp.use('/users', userRouter);\n\napp.get('/', (req, res) => {\n res.status(200).json({ message: 'Server working' });\n});\n\napp.use((err, req, res, next) => {\n console.error(err.stack);\n res.status(500).json({ error: 'Something went wrong!' });\n});\n\napp.listen(process.env.PORT || 3000, () => {\n console.log(`Server running on port ${process.env.PORT || 3000}`);\n
+});",
+ "router.user.js": "import express from 'express';\n
+ import controllerUser from './controller.user.js';\n
+ const router = express.Router();\n\n
+ 
+ router.post('/register', controllerUser.register);\n
+ router.post('/login', controllerUser.login);\n\n
+ export default router;",
+ 
+  "controller.user.js": "import User from '../models/user.js';\n\nconst register = async (req, res) => {\n try {\n const { username, password } = req.body;\n 
+ const user = await User.create({ username, password });\n res.status(201).json({ message: 'User registered successfully', user });\n } catch (error) {\n console.error(error);\n res.status(500).json({ error: 'Failed to register user' });\n }\n};\n\nconst login = async (req, res) => {\n try {\n const { username, password } = req.body;\n const user = await User.findOne({ username });\n if (!user) {\n return res.status(404).json({ error: 'User not found' });\n }\n // Add password verification logic here\n if (user.password !== password) {\n return res.status(401).json({ error: 'Incorrect password' });\n }\n res.status(200).json({ message: 'User logged in successfully', user });\n } catch (error) {\n console.error(error);\n res.status(500).json({ error: 'Failed to login user' });\n }\n};\n\nexport default {\n register,\n login,\n};", "models/user.js": "import mongoose from 'mongoose';\nconst userSchema = new mongoose.Schema({\n username: {\n type: String,\n required: true,\n unique: true,\n },\n password: {\n type: String,\n required: true,\n },\n});\n\nconst User = mongoose.model('User', userSchema);\nexport default User;", "package.json": "{\n \"type\": \"module\",\n \"name\": \"express-server\",\n \"version\": \"1.0.0\",\n \"description\": \"Express server\",\n \"main\": \"app.js\",\n \"scripts\": {\n \"start\": \"node app.js\"\n },\n \"dependencies\": {\n \"cookie-parser\": \"^1.4.7\",\n \"dotenv\": \"^16.4.7\",\n \"express\": \"^4.18.2\",\n \"mongoose\": \"^7.3.1\"\n }\n}", ".env": "MONGO_URI=mongodb://localhost:27017/your_database_name\nPORT=3000"
 }
-
-
-// Example Usage
-console.log(isPrimeOrFactor(2));     // true
-console.log(isPrimeOrFactor(7));     // true
-console.log(isPrimeOrFactor(15));    // 3
-console.log(isPrimeOrFactor(9));     //3
-console.log(isPrimeOrFactor(97));    // true
-console.log(isPrimeOrFactor(100));   //2
-console.log(isPrimeOrFactor(101));   //true
-
-//Error handling examples
-try{
-    console.log(isPrimeOrFactor(-5)); // Throws Error
-    console.log(isPrimeOrFactor(1));  // Throws Error
-    console.log(isPrimeOrFactor(1.5)); // Throws Error
-    console.log(isPrimeOrFactor("abc"));// Throws Error
-
-}catch(e){
-    console.error("Error:",e.message);
-}
-
 ```
