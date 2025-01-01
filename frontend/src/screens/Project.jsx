@@ -13,6 +13,7 @@ const Project = ({navigate}) => {
 
     const location=useLocation()
     console.log(location.state.project);
+    const [messageList,setMessageList]=useState([{sender:"developer",text:"no message history"}])
     const [isChecked,setIsChecked]=useState(false)  // while selecting user to add as colebrator
     const [project,setProject]=useState(location.state.project)
     const [isSidePanelOpen,setIsSidePanelOpen]=useState(false)
@@ -34,6 +35,7 @@ const Project = ({navigate}) => {
     const [currentFile,setCurrentFile]=useState(null)
     const [frnds,setFrnds]=useState([])
     const [openFiles,setOpenFiles]=useState([])
+
     const messageBox=React.createRef()
     const [mountedFiletree,setMountedFiletree]=useState({
         'file.js': {
@@ -43,7 +45,7 @@ const Project = ({navigate}) => {
             // "
         }
     })
-    const [running,setRunning]=useState(false)
+    const [running,setRunning]=useState(true)  // to fetching saved messages
 
 const {user}=useContext(UserContext)
     
@@ -126,10 +128,9 @@ const {user}=useContext(UserContext)
 
    }, [addUserOpen ===true||isSidePanelOpen===true])
 
-useEffect(() => {
-    runCode()
 
-},[running===true])
+
+
 
    const addUser=async()=>{
 
@@ -168,7 +169,7 @@ const checkhandler=(event)=>{
 }
 
 
-const sendMessage=()=>{
+const sendMessage=async()=>{
     console.log(user);
     
     console.log(message);
@@ -188,9 +189,19 @@ const sendMessage=()=>{
         message,
         sender:user.email
     }
+    const projectId=project._id
     appendOutgoingMessage(messageObject)
+    const resp=await axios.post('/api/message/post-message',{
+        sender:user.email,
+        text:message,
+        projectId
+    })
+    console.log(resp.data);
+    
     setMessage(" ")
 }
+
+
 
 const appendIncomingMessage=async(messageObject)=>{
     const messageBox=document.querySelector('.message-box')
@@ -221,6 +232,13 @@ const appendIncomingMessage=async(messageObject)=>{
         setTimeout(() => {
             setIsAiResponding(false);
         }, 100);
+
+        const resp=await axios.post('/api/message/post-message',{
+            sender:"AI",
+            text:messageBody.text,
+            projectId:project._id
+        })
+        console.log(resp.data);
 
     }else{
           message.classList.add('bg-red-50','p-2','max-w-56','text-black','rounded','mb-1')
@@ -295,6 +313,55 @@ const handleContentChange = (e) => {
 };
 
 
+    
+    const fetchingMessages=async()=>{
+    const projectId=project._id
+    
+        try{
+          
+        console.log(projectId);
+    
+            const messages=await axios.get(`/api/message/get-messages/${projectId}`)
+           console.log(messages.data);
+           
+            setMessageList(messages.data)
+            console.log(messageList);
+
+            const messageBox=document.querySelector('.message-box')
+            messageList.forEach((item)=>{
+              
+         const message=document.createElement('div')
+
+         if(item.sender==="AI"){
+            message.classList.add('bg-slate-950','p-2','max-w-56','text-white','rounded','mb-1')
+
+         }
+         else if(item.sender===user.email){
+             message.classList.add('bg-slate-500','p-2','ml-auto','max-w-56','text-black','rounded','mb-1')
+         }
+         else{
+            message.classList.add('bg-red-50','p-2','max-w-56','text-black','rounded','mb-1')
+         }
+
+   
+    message.innerHTML=`<p>${item.sender} </p> <p > ${item.text}</p>`
+
+
+    messageBox.appendChild(message) 
+
+ })
+    
+        }catch(err){
+            console.log(err);
+            
+        }
+    }
+   
+
+   
+ 
+
+
 
   return (
     <main>
@@ -307,11 +374,18 @@ const handleContentChange = (e) => {
            
             <div className=" bg-gray-800 w-72 relative text-white h-screen left-0 p-4">
             <div className="header mb-4 flex flex-grow  justify-between  items-center top-0">
+
+            <button 
+                onClick={fetchingMessages}
+                className="headerleft flex hover:text-slate-400 cursor-pointer">
+                <i className="ri-history-line"></i>
+                </button>
+
                 <button 
                 onClick={()=>{setAddUserOpen(true)}}
                 className="headerleft flex hover:text-slate-400 cursor-pointer">
                 <i className="ri-user-add-fill"></i>
-                <h5 className="text-pretty font-normal">Add Colaborator</h5>
+               
 
                 </button>
                 <button
@@ -336,6 +410,7 @@ const handleContentChange = (e) => {
 
                     <div className="flex flex-col flex-grow min-h-96 w-full ">
                         {/* Chat messages will go here */}
+                   
                
 
                         <div 
@@ -506,9 +581,9 @@ const handleContentChange = (e) => {
 
            <div className="userlist bg-slate-200 h-40 p-2 border-slate-700 rounded-md overflow-y-scroll ">
            {(addUserOpen===true)?(
-                    frnds.map((frnd,id)=>
+                    frnds.map((frnd,_id)=>
 
-         ( <div key={id} className="user bg-slate-50 p-1 m-1  ">{frnd.email}
+         ( <div key={_id} className="user bg-slate-50 p-1 m-1  ">{frnd.email}
           <input
           type='checkbox'
          
@@ -523,9 +598,9 @@ const handleContentChange = (e) => {
            : 
 
            ( 
-                frnds.map((frnd,id)=>
+                frnds.map((frnd,_id)=>
 
-                    ( <div key={id} className="user bg-slate-50 p-1 m-1">{frnd.email}</div>)
+                    ( <div key={_id} className="user bg-slate-50 p-1 m-1">{frnd.email}</div>)
                    )
 
             )

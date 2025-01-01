@@ -41,7 +41,7 @@ const io= new Server(server,{
 
 
 io.on('connection',(socket)=>{
-    socket.roomId=socket.project._id.toString();
+    socket.roomId=socket.project?._id.toString();
     console.log('user connected');
 
     socket.join(socket.roomId);

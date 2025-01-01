@@ -5,6 +5,7 @@ import morgan from "morgan"
 import userRoutes from './routes/user.routes.js'
 import projectRoutes from './routes/project.routes.js'
 import airoutes from './routes/ai.routes.js'
+import messageRoutes from "./routes/message.routes.js"
 import cookieParser from "cookie-parser"
 import cors from 'cors'
 import path from 'path'
@@ -37,6 +38,7 @@ app.use(express.static(frontendPath))
 app.use('/api/users',userRoutes)
 app.use('/api/projects',projectRoutes)
 app.use('/api/ai',airoutes)
+app.use('/api/message',messageRoutes)
 
 app.get("/",(req,res)=>{
     res.sendFile(path.join(frontendPath,'index.html'))
