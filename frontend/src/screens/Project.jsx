@@ -24,7 +24,7 @@ const Project = ({navigate}) => {
     const [fileTree,setFileTree]=useState({
         'file.js': {
             file:{
-            content: "  // Your application file code will be here !  // Ask Ai to Create server in express or React app" 
+            content: "  give command as : @ai create a backend server in express / @ai create frontend of ecommerce in react / @ai create c++  program to find palindrom of number " 
         }
             // "
         }
