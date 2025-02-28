@@ -7,6 +7,7 @@ const Register = () => {
 
 
     const [email,setEmail]=useState('')
+    const [loading,setLoading]=useState(false)
     const [password,setPassword]=useState('')
         const {setUser}=useContext(UserContext)
 
@@ -15,6 +16,7 @@ const Register = () => {
 
 const submithandler=async(e)=>{
     e.preventDefault()
+    setLoading(true)
      await axios.post('/api/users/register',{
         email,
         password
@@ -22,10 +24,11 @@ const submithandler=async(e)=>{
         console.log(res.data);
         localStorage.setItem('token',(res.data.token))
         setUser(res.data.user)
-        navigate('/home')
+        navigate('/login')
         
     }).catch(err=>{console.log(err.response.data)
       alert(err.response.data)
+      setLoading(false)
     navigate('/register')}
     )
 }  
@@ -59,7 +62,10 @@ const submithandler=async(e)=>{
             required
           />
         </div>
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500">Register</button>
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500">
+          {
+            loading?"loading..":"Register"
+    }</button>
       </form>
       <p className="mt-4 text-gray-400">
        Already have account ? <Link to="/login" className="text-blue-400">login</Link>

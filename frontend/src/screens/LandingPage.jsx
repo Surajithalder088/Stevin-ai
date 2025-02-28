@@ -17,7 +17,7 @@ const LandingPage = () => {
                     </div>
 
                 <div className="heading  text-4xl bg-rounded mr-52 flex flex-col align-center justify-center  p-1 w-full font-bold mb-4">
-                <button className="icons rounded-full text-4xl hover:cursor-pointer flex flex-row align-center text-black justify-center  p-4 w-full bg-sky-700  
+                <button onClick={() => navigate('/login')} className="icons rounded-full text-4xl hover:cursor-pointer flex flex-row align-center text-black justify-center  p-4 w-full bg-sky-700  
                  hover:text-white font-bold mb-4flex flex-row shadow-lg transition-transform transform hover:scale-105 hover:shadow-lg
                  align-center justify-center m-10 p-4 w--32  hover:bg-black text-black font-bold mb-4">
                 <img className='h-9 w-9' src='http://res.cloudinary.com/dbxx49ers/raw/upload/v1735561160/twq52zpdoaslp2lymbbe.svg'></img>
@@ -25,7 +25,7 @@ const LandingPage = () => {
                 Stevin AI</h1>
                 </button>
                 
-                 <p className="text-lg">A platform to manage your projects with Ai software developer .</p>
+                 <p className="text-lg">AI powered code generater and code editor ,enable to run the code online on web and also team based collaboration.</p>
                 </div>
 
                

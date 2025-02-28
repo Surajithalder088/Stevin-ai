@@ -5,7 +5,7 @@ import { UserContext } from '../context/user.context.jsx';
 
 
 const Login = () => {
-
+    const [loading,setLoading]=useState(false)
     const [email,setEmail]=useState('')
     const [password,setPassword]=useState('')
 
@@ -16,6 +16,7 @@ const Login = () => {
 
 const submithandler=async(e)=>{
     e.preventDefault()
+    setLoading(true)
      await axios.post('/api/users/login',{
         email,
         password
@@ -28,8 +29,9 @@ const submithandler=async(e)=>{
         setUser(res.data.user)
         navigate('/home')
         
-    }).catch(err=>{console.log(err.response.data)
+    }).catch(err=>{console.log(err.response?.data)
       alert("wrong credentials .....")
+      setLoading(false)
     navigate('/register')}
     )
     
@@ -66,7 +68,11 @@ const submithandler=async(e)=>{
             required
           />
         </div>
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500">Login</button>
+        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-500">
+          {
+            loading?"loding":"Login"
+          }
+          </button>
       </form>
 
 

@@ -2,10 +2,13 @@ import React ,{useContext,useState,useEffect}from 'react'
 import {UserContext} from '../context/user.context.jsx'
 import axios from '../config/axios.js'
 import {useNavigate} from 'react-router-dom'
+import {TypeAnimation} from 'react-type-animation'
+
 
 const Home = () => {
 
   const {user}=useContext(UserContext)
+  const[loading,setLoading]=useState(false)
   const [isModalOpen,setIsModalOpen]=useState(false)
   const [name, setName] = useState('')
   const[projects,setProjects]=useState([])
@@ -16,67 +19,97 @@ const Home = () => {
  const createProject=async(e)=>{
   e.preventDefault()
     
-
-     await axios.post('/api/projects/create', {name},
+      setLoading(true)
+     await axios.post('/api/projects/create', {name},{withCredentials:true}
     ).then((res) => {
 
     console.log(res.data)
   setIsModalOpen(false)
+  setLoading(false)
     setName('')
 
     })
     .catch((err) =>{console.log(err)
-  console.log(" wrong here");}
+  console.log(" wrong here");
+  setLoading(false)}
   
   )
 
   
 }
 
-useEffect(() => {
- 
-  axios.get('/api/projects/all').then((res) => {
+const deleteHandler=(id)=>{
+  setLoading(true)
+  axios.delete(`/api/projects/delete-project/${id}`).then((res) => {
+    console.log(res.data);
+   alert("group deleted")
+    setLoading(false)
+  }).catch((err) => {
+    console.log(err);
+    setLoading(false)
+  }) 
+}
+
+const fetchingProjectList=async()=>{
+ await axios.get('/api/projects/all').then((res) => {
     console.log(res.data);
     setProjects(res.data.projects);
+    
     
   }).catch((err) => {
     console.log(err);
   })
-}, [isModalOpen])
+}
+
+useEffect(() => {
+ fetchingProjectList()
+  
+}, [isModalOpen,loading])
 
 
 
   return (
    <>
    <main
-   className='p-4 bg-slate-300 h-screen'
+   className='p-4 bg-slate-300 h-screen flex flex-col'
    
    >
-    <div className="project">
+    <div className="project flex items-center gap-48">
       <button
       onClick={()=>setIsModalOpen(true)}
       className="project p-4 border border-red-400 rounded-md bg-slate-400"
-      >{"Create A New Project "}
+      >{"Create A New Group"}
       <i className="ri-file-add-line"></i>
       </button>
+      {loading?
+        (<div className='bg-neutral-800 p-5 rounded-lg w-[50%] flex justify-center text-white font-bold'>
+          Wait...    Processing...</div>):""
+      }
+       
     </div>
 
- <div className="projectheading font-semibold mt-3 ml-20 p-4 bg-slate-300 rounded-md w-fit">All Your projects here :</div>
+   
 
- {  projects.length===0 ? <div className="project mt-20 flex justify-center font-bold from-neutral-400 w-44">No Projects Yet</div>: 
+ <div className="projectheading font-semibold mt-3 ml-20 p-4 bg-slate-300 rounded-md w-fit">All Your Groups here :</div>
+
+ {  projects.length===0 ? <div className="project mt-20 flex justify-center font-bold from-neutral-400 w-44">No Groups Yet</div>: 
       <div className="projects ml-10 mt-5 flex flex-row flex-wrap">
        
         {projects.map((project) => (
           <div key={project._id}
-          onClick={()=>navigate('/project',{
-            state:{project}
-          })}
+          
           className="project p-4  hover:bg-slate-200 cursor-pointer border m-2 w-44 border-red-400 rounded-md bg-slate-400">
+           <div onClick={()=>navigate('/project',{
+            state:{project}
+          })}>
             <h2 className="text-lg font-semibold">{project.name}</h2>
             <div className="flex gap-2">
              <p className='font-thin'> <i className="ri-group-fill"></i> Collaborators:</p>
               {project.users.length}
-            </div>
+            </div></div>
+            <button onClick={()=>deleteHandler(project._id)}
+              className='bg-slate-800 w-30 h-5 flex items-center m-2 p-3 rounded-lg text-slate-50'
+              >delete</button>
           
           </div>
         ))}
@@ -120,6 +153,18 @@ useEffect(() => {
             </div>
         </div>)
 }
+
+<div className="bubble bg-white p-5 w-fit rounded-lg fixed mt-[80vh]">
+            <TypeAnimation 
+            sequence={['Create new group and add collaborator', 1000, 'Ask ai to to generate code', 1000]}
+            wrapper='span'
+            speed={55}
+            deletionSpeed={85}
+            style={{fontSize: '25px',fontFamily:'cursive'}}
+            repeat={Infinity}
+            />
+            
+        </div>
     
 
    </main>
