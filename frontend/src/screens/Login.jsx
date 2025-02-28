@@ -40,7 +40,7 @@ const submithandler=async(e)=>{
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-      <div className="h-22 w-52 bg-slate-100 p-2 rounded-md"><h4> demo user for testing :</h4><p> email:user@user.com </p><p> password :password</p></div>
+      <div className="h-22 w-52 bg-slate-100 p-2 rounded-md"><h4> **demo user for testing :</h4><p> email:user@user.com </p><p> password :password</p></div>
     <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-96">
       <h2 className="text-2xl text-white mb-4">Login</h2>
       <form 

@@ -154,11 +154,12 @@ useEffect(() => {
         </div>)
 }
 
-<div className="bubble bg-white p-5 w-fit rounded-lg fixed mt-[80vh]">
+<div className="bubble flex bg-white p-5 w-fit rounded-lg fixed mt-[80vh]">
+<img className='w-10 h-10' src='/robot-svgrepo-com.png'/> <img className='w-10 h-10' src='/bubble-message-hi-svgrepo-com.png'/> 
             <TypeAnimation 
             sequence={['Create new group and add collaborator', 1000, 'Ask ai to to generate code', 1000]}
             wrapper='span'
-            speed={55}
+            speed={35}
             deletionSpeed={85}
             style={{fontSize: '25px',fontFamily:'cursive'}}
             repeat={Infinity}

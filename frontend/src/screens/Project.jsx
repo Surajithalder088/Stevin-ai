@@ -445,15 +445,17 @@ const handleContentChange = (e) => {
        
     <div className="flex h-screen relative align-center  justify-center">
 
-        <div className="bubble bg-teal-900 text-white p-5 w-[460px] rounded-lg fixed mt-[80vh] ml-[60vw] mr-5">
+        <div className="bubble flex bg-teal-900 text-white p-5 w-[460px] rounded-lg fixed mt-[80vh] ml-[60vw] mr-5">
+             <img className='w-10 h-10' src='/robot-svgrepo-com.png'/>
             <TypeAnimation 
-            sequence={['Write message -@ai create c++ code to prime number', 1000, 'For realtime chatting add others  Collabroters to this group ', 1000]}
+            sequence={['Write message - ` @ai create c++ code to find prime number  `', 1000, 'For realtime chatting add others  Collabroters to this group ', 1000]}
             wrapper='span'
-            speed={55}
+            speed={25}
             deletionSpeed={85}
             style={{fontSize: '20px',fontFamily:'cursive'}}
             repeat={Infinity}
             />
+           
             
         </div>
             {/* Chat Section */}
@@ -619,16 +621,28 @@ const handleContentChange = (e) => {
                      </div>
 
                      <div className='bg-zinc-600 flex flex-col min-w-[25vw] max-w-[27vw]'>
-                        <div className='flex items-center gap-5 bg-slate-400'>
+                        <div className='flex items-center gap-2 bg-slate-400'>
+                            
                             <select value={codeLanguage} onChange={languageHandle}
                             className='m-2 rounded-lg p-1 bg-black text-white font-semibold hover:cursor-pointer '
                             > {/*CodeLanguage*/}
                                 
-                                <option value="js">javascript</option>
+                                <option value="js"><p>javascript</p></option>
                                 <option value="py">python</option>
                                 <option value="java">java</option>
                                 <option value='cpp'>c++</option>
                             </select>
+                            <div className='bg-black rounded-full p-1'>
+                            {
+                                codeLanguage==='cpp'?(<img className='w-6 h-6' src='/cpp3-svgrepo-com.png' />):
+                                
+                                    codeLanguage==='py'?(<img className='w-6 h-6' src='/python-svgrepo-com.png' />):
+                                        codeLanguage==='java'?(<img className='w-6 h-6' src='/java-svgrepo-com.png' />):
+                                        (<img className='w-6 h-6' src='/javascript-svgrepo-com.png' />)
+                                
+                            }</div>
+
+                           
                             {
                                 coderunLoading?(<button className='bg-black text-white p-2 cursor-not-allowed rounded-lg' 
                             onClick={(e)=>runCode(e)}
@@ -643,8 +657,8 @@ const handleContentChange = (e) => {
                         <div className='bg-white w-full h-full p-1'>
 
                             <div className='bg-gray-400 p-1 mb-1'>{
-                                codeErr===""?(<p>Your output here</p>):(
-                                <p>Failed to run this code :<span className='font-bold'> {codeErr}</span>
+                                codeErr===""?(<p className='flex gap-2'>Your output here <img className='w-5 h-5' src='/happy-svgrepo-com.png'/></p>):(
+                                <p className='flex gap-1'>Failed to run this code :<span className='font-bold'> {codeErr}</span><img className='w-5 h-5' src='/sad-but-relieved-face-svgrepo-com.png'/>
                                 </p>)
                                 }</div>
 
