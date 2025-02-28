@@ -7,9 +7,9 @@ const redisClient= new Redis({
     password:process.env.REDIS_PASSWORD
 })
 
-redisClient.on('connect',()=>{
+/*redisClient.on('connect',()=>{
     console.log("Redis connected");
     
-})
+})*/
 
 export default redisClient;

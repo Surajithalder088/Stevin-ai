@@ -1,4 +1,5 @@
 import projectModel from '../models/project.model.js';
+import messageModel from "../models/message.model.js"
 import * as projectService from '../services/project.service.js';
 import userModel from '../models/user.model.js';
 
@@ -6,6 +7,9 @@ import userModel from '../models/user.model.js';
 export const createProjectController = async (req, res) => {
     try {
         const { name} = req.body;
+        if(!req.user){
+           return res.status(400).json({ message: "unauthorized" });
+        }
     const loggenIduser=await userModel.findOne({email:req.user.email});
     const userId=loggenIduser._id;
         const project = await projectService.createProject(name, userId);
@@ -65,4 +69,22 @@ export const getProjectByIdController = async (req, res) => {
         console.log(error);
         res.status(400).json({ message: error.message });
     }
+}
+
+export const deleteproject=async(req,res)=>{
+    const {projectid}=req.params
+    try {
+        const project=await projectModel.findByIdAndDelete({_id:projectid})
+
+    if(!project){
+        return res.status(400).json({message:"falied to get project"})
+    }
+    const message=await messageModel.deleteMany({projectId:project._id})
+        res.status(200).json({message:"deleted",message})
+
+    } catch (error) {
+        res.status(500).json({message:"internal server error",error})
+    }
+
+    
 }

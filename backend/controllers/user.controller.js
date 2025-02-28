@@ -19,7 +19,7 @@ export const createUserController =async (req,res)=>{
 
         res.status(201).json({message:"success", user,token})
     }catch(error){
-        res.status(400).send(error)
+        res.status(500).send(error)
 
     }
 
@@ -35,11 +35,11 @@ export const loginController=async(req,res)=>{
         const token=jwt.sign({email:user.email},process.env.JWT_SECRET,{
             expiresIn:'24h'
         })
-        res.setHeader('Authorization',`Bearer ${token}`)
-        res.cookie('token',token,{
+        //res.setHeader('Authorization',`Bearer ${token}`)
+        res.cookie('stevin_token',token,{
             httpOnly:true,
             secure:false,
-            maxAge:60*60*24,
+            maxAge:60*60*24*100,
         })
         
         res.status(200).json({user,token})
